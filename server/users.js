@@ -14,9 +14,11 @@ const addUser=({id,name,room})=>{
       }
 
     //new user
+    else{
     const user={id,name,room}
      Users.push(user)
     return {user}
+    }
     
 }
 
@@ -32,8 +34,8 @@ const getUser=(id)=>{
     return Users.find(user=>user.id===id)
 }
 
-const getUserInRoom=(room)=>{
+const getUsersInRoom=(room)=>{
    return Users.filter((user)=>user.room==room)
 }
 
-module.exports={addUser,Users,getUser,removeUser,getUserInRoom}
+module.exports={addUser,Users,getUser,removeUser,getUsersInRoom}

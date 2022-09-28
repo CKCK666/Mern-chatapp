@@ -4,7 +4,7 @@ const http=require("http")
 const router =require("./router")
 const cors=require("cors")
 const app=express()
-const {addUser,getUser,getUserInRoom,removeUser}=require("./users")
+const {addUser,getUser,getUsersInRoom,removeUser}=require("./users")
 
 
 const server=http.createServer(app)
@@ -26,13 +26,18 @@ io.on("connection",(socket)=>{
    socket.on("join",async ({name,room},callback)=>{
      
     const {error,user}=await addUser({id:socket.id,name,room})
-  console.log(user)
-    socket.emit("message",{user:"admin",text:`Welcome to ${user.room} chat room` })
-    socket.broadcast.to(user.room).emit("message",{user:"admin",text:`${user.name}  joined`})
-    if(error){
+ if(user){
+  socket.emit("message",{user:"admin",text:`Welcome ${user.name},to ${user.room} chat room` })
+  socket.broadcast.to(user.room).emit("message",{user:"admin",text:`${user.name}  joined`})
+  io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room) });
+  socket.join(user.room)
+ }
+   
+
+    else {
       return callback(error)
     }
-   socket.join(user.room)
+   
  
    })
 
@@ -48,7 +53,9 @@ io.on("connection",(socket)=>{
      const user=await removeUser(socket.id)
      if(user){
       io.to(user.room).emit("message",{user:"admin",text:`${user.name}  left...`})
+      io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room)});
      }
+
   
    })
 })
